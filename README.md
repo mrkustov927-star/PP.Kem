@@ -1,60 +1,21 @@
-# Тренажёр — рейтинг с именем/командой и временем (GitHub Pages, docs/)
+# First Aid — рейтинг + материалы (GitHub Pages, /docs)
 
-Готовая страница для публикации на **GitHub Pages**. Работает в двух режимах:
-- **Демо** (без Firebase): рейтинг хранится только в памяти сайта.
-- **Боевой** (с Firebase): вставьте `firebaseConfig` и получите общий рейтинг в реальном времени.
+Готово к публикации. Встроен **Firebase** твоего проекта (pp10-79133).
+
+## Структура
+- `docs/index.html` — рейтинг с реальным Firebase (Anonymous Auth + Firestore `attempts`).
+- `docs/theory.html` — теория.
+- `docs/examples.html` — примеры.
+- `docs/test.html` — тест (макет, можно расширить).
 
 ## Публикация
-1) Создайте репозиторий (например, `first-aid-rating`).  
-2) Скопируйте папку `docs/` в корень репозитория.  
-3) Включите **Settings → Pages** → Source: `Deploy from a branch` → Branch: `main` → Folder: `/docs`.  
-4) Откройте адрес: `https://<логин>.github.io/<имя_репозитория>/`
+1) Создай репозиторий на GitHub и скопируй папку `docs/` в корень.
+2) Settings → Pages → Source: Deploy from a branch → Branch: main → Folder: /docs → Save.
+3) Открой страницу: `https://<логин>.github.io/<репозиторий>/`
 
-## Подключение Firebase (по желанию)
-- В консоли Firebase создайте проект, добавьте Web App и получите `firebaseConfig`.
-- В `docs/index.html` найдите блок:
-  ```js
-  const firebaseConfig = { apiKey: "", authDomain: "", projectId: "", storageBucket: "", messagingSenderId: "", appId: "" };
-  ```
-  — вставьте свои значения.
-- Включите **Authentication → Anonymous** и **Firestore**.
-- Создайте коллекцию `attempts`.  
-- (Рекомендуется) Установите строгие правила Firestore (см. раздел ниже).
+## Не забудь в Firebase Console
+- Build → Authentication → **Anonymous** → Enable.
+- Build → Firestore Database → Create → **Production mode**.
+- Rules: используй правила из прошлой инструкции или дай знать — пришлю готовый блок.
 
-## Правила Firestore (пример)
-```
-// Firestore rules
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /attempts/{doc} {
-      allow read: if true;
-      allow create: if request.auth != null
-        && request.resource.data.name is string
-        && request.resource.data.team is string
-        && request.resource.data.points is number
-        && request.resource.data.correct is number
-        && request.resource.data.total is number
-        && request.resource.data.durationMs is number
-        && request.resource.data.createdAt is timestamp
-        && request.resource.data.name.size() > 0
-        && request.resource.data.name.size() <= 40
-        && request.resource.data.team.size() <= 40
-        && request.resource.data.points <= 10000
-        && request.resource.data.total <= 200
-        && request.resource.data.durationMs <= 3600000;
-    }
-  }
-}
-```
-
-## Где ставить «отправку результата» в реальном тесте
-- На старте теста: `startTs = performance.now();`
-- При проверке: посчитайте `correct`, `total`, `durationMs = performance.now() - startTs`, `points` (ваша формула).
-- Вызовите `document.getElementById('send').click()` или перепишите логику под вашу кнопку: в коде используйте `addDoc(collection(db, 'attempts'), {...})`.
-
-## Кастомизация
-- Измените формулу очков (`points`), длительность таймера, количество вопросов (`totalNow`).
-- В таблице можно добавить столбцы (например, «Тема/Станция»), добавив поля в запись и в разметку таблицы.
-
-Удачной публикации!
+Готово! Все отправленные результаты будут автоматически появляться в таблице рейтинга.
