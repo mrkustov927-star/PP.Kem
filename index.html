@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Тренажёр — Рейтинг с именем/командой и временем</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style> body { background: linear-gradient(180deg, #f8fafc, #ffffff); } </style>
+</head>
+<body class="text-gray-900">
+  <div class="max-w-5xl mx-auto p-6">
+    <header class="mb-6">
+      <h1 class="text-3xl font-bold">Тренажёр — рейтинг и результаты</h1>
+      <p class="text-slate-600">Имя/Команда → попытка (очки, правильность, время) → «живой» рейтинг</p>
+    </header>
+
+    <!-- Profile -->
+    <section class="rounded-2xl border bg-white p-4 mb-6">
+      <div class="flex flex-col md:flex-row md:items-end md:gap-4 gap-2">
+        <div class="flex-1">
+          <label class="block text-sm mb-1">Имя/ник</label>
+          <input id="name" class="w-full border rounded-xl px-3 py-2" placeholder="Например, Анна К."/>
+        </div>
+        <div class="flex-1">
+          <label class="block text-sm mb-1">Команда (необязательно)</label>
+          <input id="team" class="w-full border rounded-xl px-3 py-2" placeholder="Например, Школа №7"/>
+        </div>
+        <button id="saveProfile" class="px-4 py-2 rounded-xl border">Сохранить профиль</button>
+      </div>
+      <div class="text-sm mt-2 opacity-70">Профиль сохраняется локально и используется при отправке результата.</div>
+    </section>
+
+    <!-- Test mock (подключи свой тест и засчитывай правильные ответы/время) -->
+    <section class="rounded-2xl border bg-white p-4 mb-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="font-semibold">Тест (макет): 5 вопросов</div>
+          <div class="text-sm opacity-70">Здесь может быть ваш реальный тест. Ниже — таймер и «Отправить результат».</div>
+        </div>
+        <div class="text-sm">⏱ Осталось: <span id="timer" class="font-semibold">60</span> c</div>
+      </div>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <button id="start" class="px-3 py-2 rounded-xl border">Старт</button>
+        <button id="answerGood" class="px-3 py-2 rounded-xl border">Ответить правильно (+1)</button>
+        <button id="answerBad" class="px-3 py-2 rounded-xl border">Ответить неверно</button>
+        <button id="finish" class="px-3 py-2 rounded-xl border">Завершить</button>
+      </div>
+      <div class="mt-3 text-sm">Верно сейчас: <span id="correctNow" class="font-medium">0</span> / <span id="totalNow">5</span></div>
+      <div class="mt-3">
+        <button id="send" class="px-4 py-2 rounded-xl bg-black text-white">Отправить результат в рейтинг</button>
+      </div>
+      <div id="sendStatus" class="mt-2 text-sm opacity-70"></div>
+    </section>
+
+    <!-- Rating -->
+    <section class="rounded-2xl border bg-white p-4">
+      <div class="flex items-center justify-between mb-2">
+        <div class="font-semibold">🏆 Рейтинг (топ-50)</div>
+        <div class="text-sm opacity-70">Сортировка: очки ↓, при равных — время ↑, свежие выше</div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="text-sm w-full">
+          <thead class="text-left">
+            <tr>
+              <th class="px-2 py-1">#</th>
+              <th class="px-2 py-1">Имя</th>
+              <th class="px-2 py-1">Команда</th>
+              <th class="px-2 py-1">Очки</th>
+              <th class="px-2 py-1">Верно</th>
+              <th class="px-2 py-1">Время</th>
+              <th class="px-2 py-1">Когда</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div id="ratingStatus" class="mt-2 text-sm opacity-70"></div>
+    </section>
+
+    <footer class="mt-8 text-sm opacity-70">
+      <div>Если не вставлен <code>firebaseConfig</code>, страница работает в локальном демо-режиме (без облака).</div>
+    </footer>
+  </div>
+
+  <!-- Core logic (демо + Firebase при наличии конфигурации) -->
+  <script type="module">
+    // ====== OPTIONAL FIREBASE (ВСТАВЬ СВОЙ КОНФИГ НИЖЕ) ======
+    // Если оставить пустым, страница запустится в локальном демо-режиме.
+    const firebaseConfig = {
+      apiKey: "",
+      authDomain: "",
+      projectId: "",
+      storageBucket: "",
+      messagingSenderId: "",
+      appId: ""
+    };
+
+    let useFirebase = Object.values(firebaseConfig).some(v => String(v||"").trim().length > 0);
+    let fb = null;
+
+    if (useFirebase) {
+      try {
+        const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js");
+        const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js");
+        const { getFirestore, serverTimestamp, collection, addDoc, query, orderBy, limit, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js");
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        await signInAnonymously(auth);
+
+        const db = getFirestore(app);
+        fb = { db, serverTimestamp, collection, addDoc, query, orderBy, limit, onSnapshot };
+        document.getElementById('ratingStatus').textContent = "Соединено с Firebase. Рейтинг обновляется в реальном времени.";
+      } catch (e) {
+        console.warn("Firebase init error:", e);
+        useFirebase = false;
+        document.getElementById('ratingStatus').textContent = "Не удалось подключиться к Firebase — включён локальный демо-режим.";
+      }
+    } else {
+      document.getElementById('ratingStatus').textContent = "Firebase не настроен — локальный демо-режим.";
+    }
+
+    // ====== DEMO state (локальная имитация) ======
+    let startTs = null;
+    let timerId = null;
+    let left = 60;
+    const total = 5;
+    let correct = 0;
+    const localAttempts = []; // для демо-режима
+
+    const el = (id) => document.getElementById(id);
+    const fmtSec = (ms) => Math.round((ms||0)/1000) + ' c';
+
+    // Profile (локально)
+    const PROFILE_KEY = "rating_profile_v1";
+    const saved = JSON.parse(localStorage.getItem(PROFILE_KEY)||"{}");
+    if (saved.name) el('name').value = saved.name;
+    if (saved.team) el('team').value = saved.team;
+    el('saveProfile').onclick = () => {
+      const name = el('name').value.trim();
+      const team = el('team').value.trim();
+      localStorage.setItem(PROFILE_KEY, JSON.stringify({ name, team }));
+      alert('Профиль сохранён');
+    };
+
+    // Test controls
+    el('start').onclick = () => {
+      correct = 0;
+      left = 60;
+      el('correctNow').textContent = correct;
+      el('timer').textContent = left;
+      startTs = performance.now();
+      timerId && clearInterval(timerId);
+      timerId = setInterval(() => {
+        left = Math.max(0, left - 1);
+        el('timer').textContent = left;
+        if (left <= 0) { clearInterval(timerId); }
+      }, 1000);
+    };
+    el('answerGood').onclick = () => {
+      if (left > 0 && startTs) {
+        correct = Math.min(total, correct + 1);
+        el('correctNow').textContent = correct;
+      }
+    };
+    el('answerBad').onclick = () => { /* визуально ничего не делаем */ };
+    el('finish').onclick = () => {
+      left = 0;
+      el('timer').textContent = left;
+      timerId && clearInterval(timerId);
+    };
+
+    // Send result
+    el('send').onclick = async () => {
+      const name = el('name').value.trim() || 'Без имени';
+      const team = el('team').value.trim() || '';
+      if (!startTs) { alert('Сначала нажмите Старт'); return; }
+
+      const durationMs = Math.max(0, performance.now() - startTs);
+      const points = correct * 5 + (left > 0 ? 5 : 0); // пример формулы
+
+      el('sendStatus').textContent = "Отправка...";
+
+      if (useFirebase) {
+        try {
+          const { db, serverTimestamp, collection, addDoc } = fb;
+          await addDoc(collection(db, 'attempts'), {
+            name, team, points, correct, total, durationMs, createdAt: serverTimestamp()
+          });
+          el('sendStatus').textContent = "✔ Отправлено в рейтинг (Firebase).";
+        } catch (e) {
+          console.error(e);
+          el('sendStatus').textContent = "⚠ Ошибка отправки в Firebase.";
+        }
+      } else {
+        localAttempts.push({ name, team, points, correct, total, durationMs, createdAt: new Date() });
+        renderLocalTable();
+        el('sendStatus').textContent = "✔ Добавлено в локальный рейтинг (демо).";
+      }
+    };
+
+    // Rating table
+    function renderLocalTable() {
+      const arr = localAttempts.slice().sort((a,b) => {
+        if (b.points !== a.points) return b.points - a.points;
+        if (a.durationMs !== b.durationMs) return a.durationMs - b.durationMs;
+        return b.createdAt - a.createdAt;
+      }).slice(0,50);
+      renderRows(arr.map((a,i)=>({...a, rank:i+1})));
+    }
+
+    function renderRows(rows) {
+      const html = rows.map(r => `
+        <tr class="border-t">
+          <td class="px-2 py-1">${r.rank}</td>
+          <td class="px-2 py-1">${String(r.name).replace(/</g,'&lt;')}</td>
+          <td class="px-2 py-1">${r.team||'—'}</td>
+          <td class="px-2 py-1">${r.points}</td>
+          <td class="px-2 py-1">${r.correct}/${r.total}</td>
+          <td class="px-2 py-1">${fmtSec(r.durationMs)}</td>
+          <td class="px-2 py-1">${r.createdAt instanceof Date ? r.createdAt.toLocaleString('ru-RU') : ''}</td>
+        </tr>
+      `).join('');
+      el('tbody').innerHTML = html || `<tr><td colspan="7" class="px-2 py-3 opacity-70">Пока нет попыток</td></tr>`;
+    }
+
+    if (useFirebase) {
+      const { db, query, collection, orderBy, limit, onSnapshot } = fb;
+      const q = query(
+        collection(db, 'attempts'),
+        orderBy('points', 'desc'),
+        orderBy('durationMs', 'asc'),
+        orderBy('createdAt', 'desc'),
+        limit(50)
+      );
+      onSnapshot(q, (snap) => {
+        const rows = [];
+        let i = 1;
+        snap.forEach(doc => {
+          const a = doc.data();
+          rows.push({
+            rank: i++,
+            name: a.name || '—',
+            team: a.team || '',
+            points: a.points || 0,
+            correct: a.correct || 0,
+            total: a.total || 0,
+            durationMs: a.durationMs || 0,
+            createdAt: a.createdAt?.toDate ? a.createdAt.toDate() : new Date()
+          });
+        });
+        renderRows(rows);
+      });
+    } else {
+      renderLocalTable();
+    }
+  </script>
+</body>
+</html>
