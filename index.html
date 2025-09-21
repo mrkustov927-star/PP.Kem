@@ -3,15 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Тренажёр — Рейтинг с именем/командой и временем</title>
+  <title>Тренажёр — Рейтинг и результаты</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style> body { background: linear-gradient(180deg, #f8fafc, #ffffff); } </style>
 </head>
 <body class="text-gray-900">
-  <div class="max-w-5xl mx-auto p-6">
+  <div class="max-w-6xl mx-auto p-6">
     <header class="mb-6">
       <h1 class="text-3xl font-bold">Тренажёр — рейтинг и результаты</h1>
       <p class="text-slate-600">Имя/Команда → попытка (очки, правильность, время) → «живой» рейтинг</p>
+      <nav class="mt-3 flex flex-wrap gap-2 text-sm">
+        <a class="px-3 py-1 border rounded-xl" href="./theory.html">📘 Теория</a>
+        <a class="px-3 py-1 border rounded-xl" href="./examples.html">🧩 10 примеров</a>
+        <a class="px-3 py-1 border rounded-xl" href="./test.html">📝 Тест-20</a>
+      </nav>
     </header>
 
     <!-- Profile -->
@@ -30,7 +35,7 @@
       <div class="text-sm mt-2 opacity-70">Профиль сохраняется локально и используется при отправке результата.</div>
     </section>
 
-    <!-- Test mock (подключи свой тест и засчитывай правильные ответы/время) -->
+    <!-- Test mock (вставь свой тест) -->
     <section class="rounded-2xl border bg-white p-4 mb-6">
       <div class="flex items-center justify-between">
         <div>
@@ -78,66 +83,29 @@
     </section>
 
     <footer class="mt-8 text-sm opacity-70">
-      <div>Если не вставлен <code>firebaseConfig</code>, страница работает в локальном демо-режиме (без облака).</div>
+      <div>Firebase включён. Если рейтинг пуст, проверьте: Authentication→Anonymous, Firestore и правила.</div>
     </footer>
   </div>
 
-  <!-- Core logic (демо + Firebase при наличии конфигурации) -->
+  <!-- Firebase + логика -->
   <script type="module">
-    // ====== OPTIONAL FIREBASE (ВСТАВЬ СВОЙ КОНФИГ НИЖЕ) ======
-    // Если оставить пустым, страница запустится в локальном демо-режиме.
-   const firebaseConfig = {
-  apiKey: "AIzaSyCj3uUUqGKZ2CalH-v3So6OjU_-eZH7tUc",
-  authDomain: "pp10-79133.firebaseapp.com",
-  projectId: "pp10-79133",
-  storageBucket: "pp10-79133.firebasestorage.app",
-  messagingSenderId: "179048880378",
-  appId: "1:179048880378:web:0510340ddfb5f639b01143",
-  measurementId: "G-QCX9BD9KY2"
-};
+    // Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import { getFirestore, serverTimestamp, collection, addDoc, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+    // === Ваш конфиг (вставлен) ===
+    const firebaseConfig = {"apiKey": "AIzaSyCj3uUUqGKZ2CalH-v3So6OjU_-eZH7tUc", "authDomain": "pp10-79133.firebaseapp.com", "projectId": "pp10-79133", "storageBucket": "pp10-79133.firebasestorage.app", "messagingSenderId": "179048880378", "appId": "1:179048880378:web:0510340ddfb5f639b01143", "measurementId": "G-QCX9BD9KY2"};
 
-    let useFirebase = Object.values(firebaseConfig).some(v => String(v||"").trim().length > 0);
-    let fb = null;
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    await signInAnonymously(auth);
+    const db = getFirestore(app);
+    document.getElementById('ratingStatus').textContent = "Соединено с Firebase. Рейтинг обновляется в реальном времени.";
 
-    if (useFirebase) {
-      try {
-        const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js");
-        const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js");
-        const { getFirestore, serverTimestamp, collection, addDoc, query, orderBy, limit, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js");
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        await signInAnonymously(auth);
-
-        const db = getFirestore(app);
-        fb = { db, serverTimestamp, collection, addDoc, query, orderBy, limit, onSnapshot };
-        document.getElementById('ratingStatus').textContent = "Соединено с Firebase. Рейтинг обновляется в реальном времени.";
-      } catch (e) {
-        console.warn("Firebase init error:", e);
-        useFirebase = false;
-        document.getElementById('ratingStatus').textContent = "Не удалось подключиться к Firebase — включён локальный демо-режим.";
-      }
-    } else {
-      document.getElementById('ratingStatus').textContent = "Firebase не настроен — локальный демо-режим.";
-    }
-
-    // ====== DEMO state (локальная имитация) ======
-    let startTs = null;
-    let timerId = null;
-    let left = 60;
-    const total = 5;
-    let correct = 0;
-    const localAttempts = []; // для демо-режима
-
-    const el = (id) => document.getElementById(id);
-    const fmtSec = (ms) => Math.round((ms||0)/1000) + ' c';
-
-    // Profile (локально)
+    // ====== Локальный профиль ======
     const PROFILE_KEY = "rating_profile_v1";
+    const el = (id) => document.getElementById(id);
     const saved = JSON.parse(localStorage.getItem(PROFILE_KEY)||"{}");
     if (saved.name) el('name').value = saved.name;
     if (saved.team) el('team').value = saved.team;
@@ -148,7 +116,14 @@ const analytics = getAnalytics(app);
       alert('Профиль сохранён');
     };
 
-    // Test controls
+    // ====== Макет теста (замени на свой) ======
+    let startTs = null;
+    let timerId = null;
+    let left = 60;
+    const total = 5;
+    let correct = 0;
+    const fmtSec = (ms) => Math.round((ms||0)/1000) + ' c';
+
     el('start').onclick = () => {
       correct = 0;
       left = 60;
@@ -168,53 +143,37 @@ const analytics = getAnalytics(app);
         el('correctNow').textContent = correct;
       }
     };
-    el('answerBad').onclick = () => { /* визуально ничего не делаем */ };
+    el('answerBad').onclick = () => { /* пропуск */ };
     el('finish').onclick = () => {
       left = 0;
       el('timer').textContent = left;
       timerId && clearInterval(timerId);
     };
 
-    // Send result
+    // ====== Отправка результата в Firestore ======
     el('send').onclick = async () => {
       const name = el('name').value.trim() || 'Без имени';
       const team = el('team').value.trim() || '';
       if (!startTs) { alert('Сначала нажмите Старт'); return; }
 
       const durationMs = Math.max(0, performance.now() - startTs);
-      const points = correct * 5 + (left > 0 ? 5 : 0); // пример формулы
-
+      const points = correct * 5 + (left > 0 ? 5 : 0); // формула очков
       el('sendStatus').textContent = "Отправка...";
 
-      if (useFirebase) {
-        try {
-          const { db, serverTimestamp, collection, addDoc } = fb;
-          await addDoc(collection(db, 'attempts'), {
-            name, team, points, correct, total, durationMs, createdAt: serverTimestamp()
-          });
-          el('sendStatus').textContent = "✔ Отправлено в рейтинг (Firebase).";
-        } catch (e) {
-          console.error(e);
-          el('sendStatus').textContent = "⚠ Ошибка отправки в Firebase.";
-        }
-      } else {
-        localAttempts.push({ name, team, points, correct, total, durationMs, createdAt: new Date() });
-        renderLocalTable();
-        el('sendStatus').textContent = "✔ Добавлено в локальный рейтинг (демо).";
+      try {
+        await addDoc(collection(db, 'attempts'), {
+          name, team, points, correct, total, durationMs, createdAt: serverTimestamp()
+        });
+        el('sendStatus').textContent = "✔ Отправлено в рейтинг (Firebase).";
+      } catch (e) {
+        console.error(e);
+        el('sendStatus').textContent = "⚠ Ошибка отправки в Firebase.";
       }
     };
 
-    // Rating table
-    function renderLocalTable() {
-      const arr = localAttempts.slice().sort((a,b) => {
-        if (b.points !== a.points) return b.points - a.points;
-        if (a.durationMs !== b.durationMs) return a.durationMs - b.durationMs;
-        return b.createdAt - a.createdAt;
-      }).slice(0,50);
-      renderRows(arr.map((a,i)=>({...a, rank:i+1})));
-    }
-
+    // ====== Рейтинг (реальное время) ======
     function renderRows(rows) {
+      const tbody = document.getElementById('tbody');
       const html = rows.map(r => `
         <tr class="border-t">
           <td class="px-2 py-1">${r.rank}</td>
@@ -222,43 +181,38 @@ const analytics = getAnalytics(app);
           <td class="px-2 py-1">${r.team||'—'}</td>
           <td class="px-2 py-1">${r.points}</td>
           <td class="px-2 py-1">${r.correct}/${r.total}</td>
-          <td class="px-2 py-1">${fmtSec(r.durationMs)}</td>
+          <td class="px-2 py-1">${Math.round((r.durationMs||0)/1000)} c</td>
           <td class="px-2 py-1">${r.createdAt instanceof Date ? r.createdAt.toLocaleString('ru-RU') : ''}</td>
         </tr>
       `).join('');
-      el('tbody').innerHTML = html || `<tr><td colspan="7" class="px-2 py-3 opacity-70">Пока нет попыток</td></tr>`;
+      tbody.innerHTML = html || `<tr><td colspan="7" class="px-2 py-3 opacity-70">Пока нет попыток</td></tr>`;
     }
 
-    if (useFirebase) {
-      const { db, query, collection, orderBy, limit, onSnapshot } = fb;
-      const q = query(
-        collection(db, 'attempts'),
-        orderBy('points', 'desc'),
-        orderBy('durationMs', 'asc'),
-        orderBy('createdAt', 'desc'),
-        limit(50)
-      );
-      onSnapshot(q, (snap) => {
-        const rows = [];
-        let i = 1;
-        snap.forEach(doc => {
-          const a = doc.data();
-          rows.push({
-            rank: i++,
-            name: a.name || '—',
-            team: a.team || '',
-            points: a.points || 0,
-            correct: a.correct || 0,
-            total: a.total || 0,
-            durationMs: a.durationMs || 0,
-            createdAt: a.createdAt?.toDate ? a.createdAt.toDate() : new Date()
-          });
+    const q = query(
+      collection(db, 'attempts'),
+      orderBy('points', 'desc'),
+      orderBy('durationMs', 'asc'),
+      orderBy('createdAt', 'desc'),
+      limit(50)
+    );
+    onSnapshot(q, (snap) => {
+      const rows = [];
+      let i = 1;
+      snap.forEach(doc => {
+        const a = doc.data();
+        rows.push({
+          rank: i++,
+          name: a.name || '—',
+          team: a.team || '',
+          points: a.points || 0,
+          correct: a.correct || 0,
+          total: a.total || 0,
+          durationMs: a.durationMs || 0,
+          createdAt: a.createdAt?.toDate ? a.createdAt.toDate() : new Date()
         });
-        renderRows(rows);
       });
-    } else {
-      renderLocalTable();
-    }
+      renderRows(rows);
+    });
   </script>
 </body>
 </html>
