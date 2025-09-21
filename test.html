@@ -5,49 +5,227 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Тест-20 — Первая помощь</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style> body{background:linear-gradient(180deg,#f8fafc,#fff);} </style>
 </head>
-<body class="text-gray-900">
+<body class="text-gray-900" style="background:linear-gradient(180deg,#f8fafc,#fff)">
   <div class="max-w-6xl mx-auto p-6">
     <header class="mb-6">
       <h1 class="text-3xl font-bold">📝 Тест — 20 вопросов</h1>
-      <p class="text-slate-600">После проверки откроются правильные ответы и итоговый балл</p>
+      <p class="text-slate-600">Ответь на вопросы, нажми «Проверить», затем «Отправить в рейтинг».</p>
       <nav class="mt-3 flex flex-wrap gap-2 text-sm">
         <a class="px-3 py-1 border rounded-xl" href="./index.html">🏠 Рейтинг</a>
         <a class="px-3 py-1 border rounded-xl" href="./theory.html">📘 Теория</a>
         <a class="px-3 py-1 border rounded-xl" href="./examples.html">🧩 10 примеров</a>
-        <a class="px-3 py-1 border rounded-xl" href="./test.html">📝 Тест-20</a>
       </nav>
     </header>
 
-<section id="quiz" class="space-y-4">
-  <div class="rounded-2xl border bg-white p-4">
-    <div class="font-medium mb-2">1. Оценка дыхания у без сознания длится…</div>
-    <div class="grid md:grid-cols-3 gap-2">
-      <button class="ans border rounded-xl px-3 py-2" data-q="0" data-idx="0">до 5 сек</button>
-      <button class="ans border rounded-xl px-3 py-2" data-q="0" data-idx="1">до 10 сек</button>
-      <button class="ans border rounded-xl px-3 py-2" data-q="0" data-idx="2">до 20 сек</button>
+    <div class="rounded-2xl border bg-white p-4 mb-4 flex items-center justify-between">
+      <div class="text-sm">⏱ Время идёт: <span id="timer" class="font-semibold">0</span> c</div>
+      <div class="text-sm">Верных сейчас: <span id="okNow" class="font-semibold">0</span> / 20</div>
     </div>
-    <div id="res0" class="mt-2 text-sm opacity-70"></div>
-  </div>
-</section>
-<div class="mt-4 flex gap-3">
-  <button id="check" class="px-4 py-2 rounded-xl bg-black text-white">Проверить</button>
-  <button id="reset" class="px-4 py-2 rounded-xl border">Сбросить</button>
-  <div id="score" class="text-sm opacity-70 self-center"></div>
-</div>
-<script>
-  const correct = [1];
-  const answers = Array(correct.length).fill(null);
-  const resEls = [document.getElementById('res0')];
-  document.querySelectorAll('.ans').forEach(btn=>{btn.addEventListener('click',()=>{const qi=+btn.dataset.q,oi=+btn.dataset.idx;answers[qi]=oi;[...btn.parentElement.children].forEach(b=>b.classList.remove('border-black'));btn.classList.add('border-black');});});
-  document.getElementById('check').onclick=()=>{{let ok=0;answers.forEach((a,i)=>{{const good=a===correct[i];if(good) ok++;resEls[i].textContent='Правильный ответ: '+String.fromCharCode(65+correct[i]);}});document.getElementById('score').textContent='Итог: '+ok+' / '+correct.length;}};
-  document.getElementById('reset').onclick=()=>window.location.reload();
-</script>
 
-    <footer class="mt-10 text-sm opacity-70">
-      <div>© Региональный чемпионат по оказанию первой помощи · Кемь</div>
-    </footer>
+    <section id="quiz" class="space-y-4">
+      
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">1. Оценка дыхания у без сознания длится…</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="0" data-idx="0">до 5 сек</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="0" data-idx="1">до 10 сек</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="0" data-idx="2">до 20 сек</button></div>
+      <div id="res0" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">2. Приоритет первичного осмотра по РКК:</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="1" data-idx="0">Сознание→дыхание→кровотечение</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="1" data-idx="1">Кровотечение→сознание→дыхание</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="1" data-idx="2">Дыхание→сознание→кровотечение</button></div>
+      <div id="res1" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">3. Первое при сильном кровотечении:</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="2" data-idx="0">Жгут ниже</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="2" data-idx="1">Давящая повязка/прямое давление</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="2" data-idx="2">Промыть водой</button></div>
+      <div id="res2" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">4. Жгут накладывают:</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="3" data-idx="0">Ниже</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="3" data-idx="1">Выше</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="3" data-idx="2">На рану</button></div>
+      <div id="res3" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">5. Время жгута:</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="4" data-idx="0">Не нужно</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="4" data-idx="1">Зафиксировать и озвучить</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="4" data-idx="2">Только по просьбе</button></div>
+      <div id="res4" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">6. Инородное тело в ране:</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="5" data-idx="0">Извлечь</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="5" data-idx="1">Не извлекать, фиксировать вокруг</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="5" data-idx="2">Углубить</button></div>
+      <div id="res5" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">7. Алгоритм при удушье:</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="6" data-idx="0">5 ударов→5 Геймлиха</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="6" data-idx="1">Сразу СЛР</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="6" data-idx="2">Дать воды</button></div>
+      <div id="res6" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">8. Без сознания с дыханием:</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="7" data-idx="0">Боковое положение</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="7" data-idx="1">Посадить</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="7" data-idx="2">На спине</button></div>
+      <div id="res7" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">9. Оценка дыхания длится:</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="8" data-idx="0">до 10 сек</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="8" data-idx="1">до 30 сек</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="8" data-idx="2">сколько нужно</button></div>
+      <div id="res8" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">10. СЛР (взрослый) соотношение:</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="9" data-idx="0">15:2</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="9" data-idx="1">30:2</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="9" data-idx="2">50:5</button></div>
+      <div id="res9" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">11. Частота компрессий:</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="10" data-idx="0">60–80/мин</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="10" data-idx="1">100–120/мин</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="10" data-idx="2">140–160/мин</button></div>
+      <div id="res10" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">12. Глубина компрессий:</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="11" data-idx="0">3–4 см</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="11" data-idx="1">5–6 см</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="11" data-idx="2">7–8 см</button></div>
+      <div id="res11" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">13. Носовое кровотечение — положение головы:</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="12" data-idx="0">Назад</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="12" data-idx="1">Вперёд</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="12" data-idx="2">Лечь</button></div>
+      <div id="res12" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">14. Ожог — первое действие:</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="13" data-idx="0">Охлаждение 10–15 мин</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="13" data-idx="1">Крем</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="13" data-idx="2">Лёд</button></div>
+      <div id="res13" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">15. Судороги — нельзя:</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="14" data-idx="0">Вставлять предмет в рот</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="14" data-idx="1">Убрать предметы вокруг</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="14" data-idx="2">Под голову мягкое</button></div>
+      <div id="res14" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">16. После судорог (дыхание есть):</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="15" data-idx="0">Боковое положение</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="15" data-idx="1">На спине</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="15" data-idx="2">Посадить</button></div>
+      <div id="res15" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">17. Анафилаксия — в первую очередь:</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="16" data-idx="0">Дать воды</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="16" data-idx="1">112/103, адреналин-автоинъектор</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="16" data-idx="2">Ждать</button></div>
+      <div id="res16" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">18. Согласие на помощь (контактный):</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="17" data-idx="0">Вам нужна помощь?</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="17" data-idx="1">Вы кто?</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="17" data-idx="2">Где болит?</button></div>
+      <div id="res17" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">19. Без сознания — согласие:</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="18" data-idx="0">Расписка</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="18" data-idx="1">Подразумевается автоматически</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="18" data-idx="2">Спросить у друзей</button></div>
+      <div id="res18" class="mt-2 text-sm opacity-70"></div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4">
+      <div class="font-medium mb-2">20. Звонок 112 — назвать:</div>
+      <div class="grid md:grid-cols-3 gap-2"><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="19" data-idx="0">Только адрес</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="19" data-idx="1">Кто, что, где, сколько пострадавших, состояние, контакт</button><button class="ans border rounded-xl px-3 py-2 text-left hover:bg-gray-50" data-q="19" data-idx="2">Только что произошло</button></div>
+      <div id="res19" class="mt-2 text-sm opacity-70"></div>
+    </div>
+    </section>
+
+    <div class="mt-4 flex flex-wrap gap-3">
+      <button id="check" class="px-4 py-2 rounded-xl bg-black text-white">Проверить</button>
+      <button id="send" class="px-4 py-2 rounded-xl border">Отправить в рейтинг</button>
+      <button id="reset" class="px-4 py-2 rounded-xl border">Сбросить</button>
+      <div id="score" class="text-sm opacity-70 self-center"></div>
+      <div id="sendStatus" class="text-sm opacity-70 self-center"></div>
+    </div>
   </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import { getFirestore, serverTimestamp, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+    const firebaseConfig = {"apiKey": "AIzaSyCj3uUUqGKZ2CalH-v3So6OjU_-eZH7tUc", "authDomain": "pp10-79133.firebaseapp.com", "projectId": "pp10-79133", "storageBucket": "pp10-79133.firebasestorage.app", "messagingSenderId": "179048880378", "appId": "1:179048880378:web:0510340ddfb5f639b01143", "measurementId": "G-QCX9BD9KY2"};
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    await signInAnonymously(auth);
+    const db = getFirestore(app);
+
+    // Профиль
+    const PROFILE_KEY = "rating_profile_v1";
+    const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
+
+    // Таймер
+    let startTs = performance.now();
+    let elapsed = 0;
+    setInterval(()=>{
+      elapsed = Math.round((performance.now()-startTs)/1000);
+      document.getElementById('timer').textContent = elapsed;
+    },1000);
+
+    const correct = [1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1];
+    const answers = Array(correct.length).fill(null);
+    const resEls = correct.map((_,i)=>document.getElementById('res'+i));
+    document.querySelectorAll('.ans').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const qi=+btn.dataset.q, oi=+btn.dataset.idx;
+        answers[qi]=oi;
+        [...btn.parentElement.children].forEach(b=>b.classList.remove('border-black'));
+        btn.classList.add('border-black');
+        // quick count
+        let ok=0; answers.forEach((a,i)=>{ if(a===correct[i]) ok++; });
+        document.getElementById('okNow').textContent = ok;
+      });
+    });
+
+    let lastScore = 0;
+    document.getElementById('check').onclick = ()=>{
+      let ok=0;
+      answers.forEach((a,i)=>{
+        if(a===correct[i]) ok++;
+        resEls[i].textContent = 'Правильный ответ: ' + String.fromCharCode(65+correct[i]);
+      });
+      lastScore = ok;
+      document.getElementById('score').textContent = 'Итог: ' + ok + ' / ' + correct.length;
+    };
+
+    document.getElementById('reset').onclick = ()=>window.location.reload();
+
+    document.getElementById('send').onclick = async ()=>{
+      if (!profile || !profile.name) { alert('Сначала укажи имя/команду на странице рейтинга (index.html) — кнопка «Сохранить профиль».'); return; }
+      const durationMs = Math.round((performance.now()-startTs));
+      const points = lastScore*3 + (elapsed<=120 ? 5:0);
+      document.getElementById('sendStatus').textContent = 'Отправка...';
+      try {
+        await addDoc(collection(db,'attempts'), {
+          name: profile.name,
+          team: profile.team || '',
+          points,
+          correct: lastScore,
+          total: correct.length,
+          durationMs,
+          createdAt: serverTimestamp()
+        });
+        document.getElementById('sendStatus').textContent = '✔ Отправлено в рейтинг.';
+      } catch(e) {
+        console.error(e);
+        document.getElementById('sendStatus').textContent = '⚠ Ошибка отправки.';
+      }
+    };
+  </script>
 </body>
 </html>
