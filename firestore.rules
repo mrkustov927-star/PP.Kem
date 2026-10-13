@@ -1,0 +1,48 @@
+// Recommended rules for the new training records. These are NOT automatically
+// deployed by GitHub Pages. Review existing collections before applying.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /attempts/{attemptId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['schemaVersion','id','mode','topic','name','team','correct','total','points','maxPoints','percent','wrong','topics','durationMs','finishedAt','expired','contentVersion','uid','createdAt'])
+        && request.resource.data.schemaVersion == 2
+        && request.resource.data.contentVersion == '2026.10.13'
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.id == attemptId
+        && request.resource.data.mode in ['training','exam','municipal']
+        && request.resource.data.topic == 'all'
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 40
+        && request.resource.data.team is string
+        && request.resource.data.team.size() <= 60
+        && request.resource.data.correct is int
+        && request.resource.data.total is int
+        && request.resource.data.total > 0
+        && request.resource.data.total <= 100
+        && request.resource.data.correct >= 0
+        && request.resource.data.correct <= request.resource.data.total
+        && request.resource.data.points is int
+        && request.resource.data.maxPoints is int
+        && request.resource.data.maxPoints > 0
+        && request.resource.data.maxPoints <= 300
+        && request.resource.data.points >= 0
+        && request.resource.data.points <= request.resource.data.maxPoints
+        && request.resource.data.percent is int
+        && request.resource.data.percent >= 0
+        && request.resource.data.percent <= 100
+        && request.resource.data.durationMs is int
+        && request.resource.data.durationMs >= 0
+        && request.resource.data.durationMs <= 86400000
+        && request.resource.data.finishedAt is int
+        && request.resource.data.expired is bool
+        && request.resource.data.wrong is list
+        && request.resource.data.wrong.size() <= 100
+        && request.resource.data.topics is map
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+  }
+}
