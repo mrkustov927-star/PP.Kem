@@ -1,12 +1,13 @@
 'use strict';
 (function(root){
   const shuffle=(input,random=Math.random)=>{const a=input.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+  function questionBank(data){return [...data.questions,...data.cases.flatMap(c=>c.checks.map((q,i)=>({...q,id:c.id+'-'+i,topic:c.topic,kind:'case',group:c.title,context:c.story}))),...data.observations.flatMap(o=>o.checks.map((q,i)=>({...q,id:o.id+'-'+i,topic:o.topic,kind:'observation',group:o.title,context:o.frames.join('\n')})))];}
   function makePaper(data,mode,topic='all',wrongIds=[],random=Math.random){
     let pool=data.questions.filter(q=>topic==='all'||q.topic===topic);
-    if(mode==='retry')pool=data.questions.filter(q=>wrongIds.includes(q.id));
+    if(mode==='retry')pool=questionBank(data).filter(q=>wrongIds.includes(q.id));
     if(!pool.length)return [];
     const count=mode==='municipal'?10:Math.min(20,pool.length);
-    const paper=shuffle(pool,random).slice(0,count).map(q=>({...q,group:'Знания',weight:1}));
+    const paper=shuffle(pool,random).slice(0,count).map(q=>({...q,group:q.group||'Знания',weight:1}));
     if(mode==='municipal'){
       shuffle(data.cases,random).slice(0,3).forEach(c=>c.checks.forEach((q,i)=>paper.push({...q,id:c.id+'-'+i,topic:c.topic,kind:'case',weight:3,group:c.title,context:c.story})));
       shuffle(data.observations,random).slice(0,2).forEach(o=>o.checks.forEach((q,i)=>paper.push({...q,id:o.id+'-'+i,topic:o.topic,kind:'observation',weight:2,group:o.title,context:o.frames.join('\n')})));
@@ -27,5 +28,5 @@
   function safeRead(storage,key,fallback){try{const raw=storage.getItem(key);return raw===null?fallback:JSON.parse(raw);}catch{return fallback;}}
   function safeWrite(storage,key,value){try{storage.setItem(key,JSON.stringify(value));return true;}catch{return false;}}
   function safeText(v,max=100){return typeof v==='string'?v.slice(0,max):'';}
-  const api={shuffle,makePaper,evaluate,newSession,finish,validResult,participant,identify,record,safeRead,safeWrite,safeText};root.PPCore=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
+  const api={shuffle,questionBank,makePaper,evaluate,newSession,finish,validResult,participant,identify,record,safeRead,safeWrite,safeText};root.PPCore=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

@@ -11,8 +11,9 @@ service cloud.firestore {
         && request.resource.data.contentVersion == '2026.10.13'
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.id == attemptId
-        && request.resource.data.mode in ['training','exam','municipal']
-        && request.resource.data.topic == 'all'
+        && request.resource.data.mode in ['training','exam','municipal','retry']
+        && request.resource.data.topic is string
+        && request.resource.data.topic.size() <= 30
         && request.resource.data.name is string
         && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 40

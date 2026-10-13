@@ -11,3 +11,14 @@ test('corrupt/blocked storage does not stop preparation',()=>{assert.deepEqual(C
 test('invalid records rejected and score ratios remain consistent',()=>{const s=C.newSession(D,'training','all',[],1000);s.answers=s.paper.map(q=>q.correct);C.finish(s,11000);const r=C.record(s);assert(!C.validResult({...r,durationMs:-1}));assert(!C.validResult({...r,correct:999}));assert(!C.validResult({...r,percent:99}));assert(!C.validResult({...r,schemaVersion:1}));});
 test('participant requires both fields, including after whitespace trimming',()=>{for(const p of [{},{name:'Настя'},{team:'Команда'},{name:'   ',team:'Команда'},{name:'Настя',team:'\t\n'},{name:'А'.repeat(41),team:'Команда'}])assert.throws(()=>C.participant(p));assert.deepEqual(C.participant({name:' Настя ',team:' Первые '}),{name:'Настя',team:'Первые'});});
 test('attempt keeps start identity when profile changes before finish or export',()=>{const profile={name:'Настя',team:'Первые'};const s=C.identify(C.newSession(D,'exam','all',[],1000),profile);profile.name='Другой участник';profile.team='Другая команда';s.answers=s.paper.map(q=>q.correct);C.finish(s,11000);assert.equal(C.record(s,profile).name,'Настя');assert.equal(C.record(s,profile).team,'Первые');assert(Object.isFrozen(s.participant));});
+
+test('retry includes errors from municipal cases and observations',()=>{
+  const selected=['c1-0','o2-2'];
+  const paper=C.makePaper(D,'retry','all',selected);
+  assert.deepEqual(paper.map(q=>q.id).sort(),selected.slice().sort());
+  assert.ok(paper.every(q=>q.context&&q.topic&&q.weight===1));
+  const s=C.newSession(D,'retry','all',selected,1000);
+  s.answers=s.paper.map(q=>q.correct);
+  C.finish(s,2000);
+  assert.equal(s.result.correct,2);
+});

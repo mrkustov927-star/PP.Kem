@@ -3,3 +3,27 @@
 .karelia .card,.karelia .station-head>div{min-width:0}.karelia p,.karelia h3,.karelia .check-label span{overflow-wrap:anywhere}.rk-total{margin-top:18px}.rk-station{scroll-margin-top:90px}.rk-group{border-top:1px solid var(--line);padding:20px 0 4px}.rk-group h4{font-size:18px;margin-bottom:10px}.rk-count{font-weight:750;margin-top:18px}.karelia .station-clock{font-size:clamp(22px,3vw,32px)}.karelia summary{padding:16px 0}.karelia .checks{grid-template-columns:1fr}.karelia .check-label{border-bottom:1px solid var(--line)}@media(max-width:780px){.karelia h3{font-size:21px}.karelia .station-head>div,.karelia .station-head button{max-width:100%}}@media print{.karelia .rk-station{break-inside:auto}.karelia .rk-group{break-inside:avoid}.karelia details>div{display:block!important}}
 
 .balance,.notice{overflow-wrap:anywhere}.scroll-table{max-width:100%}
+
+/* Forms keep readable widths instead of shrinking beside large buttons. */
+.toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:end}
+.toolbar .field{min-width:0;width:100%}.toolbar .field label{overflow-wrap:anywhere;line-height:1.45}
+.toolbar input,.toolbar select{width:100%;min-width:0}.toolbar>button{justify-self:start;max-width:100%}
+.grid>*,.card,.section-head>*,.station-head>*{min-width:0}
+.option span,.check-label span,.card p,.card h3,.attempt-identity{overflow-wrap:anywhere;min-width:0}
+.section-head{flex-wrap:wrap;align-items:center}.section-head h3{margin-bottom:0}.section-head .actions{margin-top:0}
+.station-head>div:first-child{flex:1}.station-head .no-print{flex:none}
+.search-count{margin-left:0}.lesson,.question{scroll-margin-top:90px}
+.quiz-sticky button{flex-shrink:0}.nav a{scroll-margin-inline:12px}
+.sources-table{white-space:normal;table-layout:fixed}.sources-table th{width:30%}.sources-table td{overflow-wrap:anywhere}
+.scroll-table:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+@media(max-width:780px){
+ .toolbar{grid-template-columns:minmax(0,1fr);gap:16px}.toolbar>button{width:100%;justify-self:stretch}
+ .section-head{flex-direction:column;align-items:stretch;gap:14px}.section-head .actions{width:100%}
+ .section-head .actions button{flex:1 1 180px}.quiz-sticky{display:grid;grid-template-columns:1fr auto;gap:10px}
+ .quiz-sticky button{grid-column:1/-1;width:100%}.quiz-sticky span{overflow-wrap:anywhere}
+ .station .checks{grid-template-columns:minmax(0,1fr)}.station-head .no-print{width:100%}
+ .station-head .no-print button{width:100%}.card summary{overflow-wrap:anywhere}
+ h2{overflow-wrap:anywhere}.sources-table{font-size:13px}.sources-table td,.sources-table th{padding:10px 6px}
+ .toast{width:calc(100% - 32px);max-width:calc(100% - 32px);overflow-wrap:anywhere}
+}
+@media print{.toolbar{display:none!important}.scroll-table{overflow:visible}.table{white-space:normal}.quiz-sticky{display:none!important}}

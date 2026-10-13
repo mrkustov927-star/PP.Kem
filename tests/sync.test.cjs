@@ -1,0 +1,9 @@
+const test=require('node:test'),assert=require('node:assert/strict');
+global.PPCore=require('../assets/core.js');
+const C=global.PPCore,D=require('../assets/content.js'),S=require('../assets/sync.js');
+function record(){const s=C.identify(C.newSession(D,'training','burn',[],1000),{name:'Тест',team:'Команда'});s.answers=s.paper.map(q=>q.correct);C.finish(s,2000);return {...C.record(s),autoPublish:true};}
+test('only newly opted-in complete attempts enter automatic queue',()=>{const r=record();assert(S.eligible(r));assert(!S.eligible({...r,autoPublish:false}));assert(!S.eligible({...r,cloudSent:true}));assert(!S.eligible({...r,team:''}));assert(!S.eligible({...r,durationMs:-1}));});
+test('failed network write can be retried with the same document ID',async()=>{const r=record();let writes=0;const t={uid:'u1',timestamp:()=>123,read:async()=>null,write:async(id,p)=>{assert.equal(id,r.id);assert.equal(p.team,'Команда');if(++writes===1)throw Error('offline');}};await assert.rejects(S.send(r,t));assert(S.eligible(r));await S.send(r,t);assert.equal(writes,2);});
+test('acknowledgement lost after server write does not create a second result',async()=>{const r=record();let stored=null,writes=0;const t={uid:'u1',timestamp:()=>123,read:async()=>stored,write:async(id,p)=>{writes++;stored=p;throw Error('lost-ack');}};await assert.rejects(S.send(r,t));const result=await S.send(r,t);assert(result.alreadySaved);assert.equal(writes,1);});
+test('local flags and error messages are never uploaded',()=>{const p=S.payload({...record(),cloudSent:false,syncError:'internal',autoPublish:true},'u1',123);assert(!('autoPublish' in p));assert(!('cloudSent' in p));assert(!('syncError' in p));});
+test('conflicting server result is not overwritten',async()=>{const r=record();let writes=0;await assert.rejects(S.send(r,{uid:'u1',timestamp:()=>123,read:async()=>({uid:'someone-else'}),write:async()=>writes++}));assert.equal(writes,0);});
