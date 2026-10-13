@@ -17,6 +17,7 @@ service cloud.firestore {
         && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 40
         && request.resource.data.team is string
+        && request.resource.data.team.size() > 0
         && request.resource.data.team.size() <= 60
         && request.resource.data.correct is int
         && request.resource.data.total is int
