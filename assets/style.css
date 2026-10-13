@@ -27,3 +27,5 @@
  .toast{width:calc(100% - 32px);max-width:calc(100% - 32px);overflow-wrap:anywhere}
 }
 @media print{.toolbar{display:none!important}.scroll-table{overflow:visible}.table{white-space:normal}.quiz-sticky{display:none!important}}
+
+.sources-table th{overflow-wrap:anywhere;hyphens:auto}
