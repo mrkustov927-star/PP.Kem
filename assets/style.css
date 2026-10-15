@@ -29,3 +29,6 @@
 @media print{.toolbar{display:none!important}.scroll-table{overflow:visible}.table{white-space:normal}.quiz-sticky{display:none!important}}
 
 .sources-table th{overflow-wrap:anywhere;hyphens:auto}
+
+
+.next-step{margin-top:20px}#quizProfileForm{scroll-margin-top:90px}.lesson-content .grid{padding-top:8px}.actions button{max-width:100%}.feedback{overflow-wrap:anywhere}
